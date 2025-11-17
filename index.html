@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Quicksand:wght@400;500&display=swap" rel="stylesheet">
+    
+    <title>20 - 11</title>
+
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            display: grid;
+            place-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #fdebed 0%, #ffc7d9 100%);
+            overflow: hidden; 
+        }
+
+        /* Container cho hiệu ứng rơi */
+        #falling-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* QUAN TRỌNG: Vẫn giữ 'none' ở đây để có thể nhấp xuyên qua
+              khoảng trống. Chúng ta sẽ bật 'auto' cho từng vật thể.
+            */
+            pointer-events: none;
+            z-index: 5;
+            overflow: hidden;
+        }
+
+        /* Kiểu cho các vật thể rơi (hoa, quà) */
+        .falling-item {
+            position: absolute;
+            top: -10%; 
+            font-size: 1.5rem; 
+            user-select: none; 
+            animation: fall linear forwards;
+
+            /* --- CẬP NHẬT --- */
+            /* Cho phép nhấp chuột vào CHỈ vật thể này */
+            pointer-events: auto; 
+            /* Đổi con trỏ để người dùng biết nó có thể nhấp */
+            cursor: pointer; 
+            transition: transform 0.2s ease;
+        }
+
+        /* Thêm hiệu ứng hover nhỏ */
+        .falling-item:hover {
+            transform: scale(1.2);
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(110vh) rotate(720deg);
+                opacity: 0.5; 
+            }
+        }
+
+        /* --- PHẦN MỚI: Lời chúc nhỏ khi nhấp --- */
+        .click-message {
+            position: fixed; /* Hiển thị cố định trên màn hình */
+            left: 0;
+            top: 0;
+            font-family: 'Quicksand', sans-serif;
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #c2255c; /* Màu hồng đậm hơn */
+            pointer-events: none; /* Không thể nhấp vào lời chúc */
+            user-select: none;
+            z-index: 1001; /* Luôn ở trên cùng */
+            
+            /* Gọi animation 'floatUp' */
+            animation: floatUp 1.5s ease-out forwards;
+        }
+
+        /* --- PHẦN MỚI: Animation cho lời chúc nhỏ --- */
+        @keyframes floatUp {
+            from {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.8);
+            }
+        }
+        /* --- Hết phần mới --- */
+
+
+        /* Thư và thẻ */
+        #envelope, #card {
+            position: relative; 
+            z-index: 10;
+        }
+
+        #envelope {
+            cursor: pointer;
+            background: white; /* Màu thân thư */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative; 
+            z-index: 10; 
+
+            /* 1. Đặt kích thước cố định */
+            width: 300px; /* Chiều rộng lá thư */
+            height: 180px; /* Chiều cao lá thư */
+
+            /* 2. Dùng flex để căn giữa chữ */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            /* 3. Bo góc nhẹ cho giống thư */
+            border-radius: 8px;
+        }
+
+        #envelope:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        #envelope::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            
+            /* Tạo tam giác bằng border:
+              - border-top: là 'màu' và 'chiều cao' của tam giác
+              - border-left/right: là 'cạnh' trong suốt, 
+                độ rộng bằng 1/2 chiều rộng thư (300/2 = 150)
+            */
+            border-top: 90px solid #f5f5f5; /* Cao 90px (nửa lá thư), màu xám nhạt */
+            border-left: 150px solid transparent;
+            border-right: 150px solid transparent;
+
+            z-index: 1; /* Nằm dưới chữ */
+            
+            /* Bo tròn 2 góc trên của nắp */
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+        /* Thêm 'đường kẻ' mép nắp */
+        #envelope::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 90px; /* Đúng vị trí 1/2 chiều cao */
+            width: 100%;
+            height: 1px;
+            background: #e0e0e0; /* Màu đường kẻ mờ */
+            z-index: 2; /* Nằm trên nắp */
+        }
+        #envelope p {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #d6336c;
+            
+            /* Quan trọng: Đặt chữ lên trên nắp thư */
+            position: relative;
+            z-index: 3;
+        }
+        
+        #card {
+            display: none; 
+            text-align: center;
+            background: white;
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            animation: fadeIn 0.5s ease-in-out;
+            max-width: 90%;
+            box-sizing: border-box; 
+            width: 90%; 
+            max-width: 700px; 
+            max-height: 85vh;
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        #main-title {
+            font-family: 'Dancing Script', cursive;
+            font-size: 3rem;
+            color: #d6336c;
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        #card .message {
+            font-size: 1.25rem;
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+
+        #card img {
+            max-width: 100%;
+            height: auto;
+            max-height: 200px;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+        }
+        
+        #card .footer-text {
+            font-size: 1rem;
+            color: #888;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        #card{
+            background: 
+            linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)),
+            url('nen1.jpg') no-repeat center/cover;
+        }
+    </style>
+</head>
+<body>
+    <audio id="background-music" loop>
+        <source src="super mario soundtrack.mp3" type="audio/mpeg">
+    </audio>
+    <div id="falling-container"></div>
+
+    <div id="envelope">
+        <p>💌</p>
+    </div>
+
+    <div id="card">
+        <h1 id="main-title">Kính tặng Cô Lan</h1>
+        <!-- <p class="message" style="font-weight: 500; font-size: 1.1rem; margin-top: -15px; margin-bottom: 20px;">
+            Nhân ngày Nhà giáo Việt Nam 20/11
+        </p> -->
+
+        <img src="https://media.tenor.com/E8j-nQk3D-cAAAAi/peach-goma.gif" alt="Cute animation">
+
+        <div class="message" style="text-align: left; max-width: 550px; margin-top: 25px; font-size: 1.15rem; line-height: 1.6;">
+            
+            <p style="font-weight: bold; color: #d6336c;">Cô ơi,</p>
+            
+            <p style="margin-bottom: 1rem;">
+                Nhân dịp 20/11, chúng em xin gửi lời tri ân chân thành và sâu sắc nhất đến Cô. 
+                Cảm ơn Cô rất nhiều vì đã nhận lời hướng dẫn chúng em trong chặng đường làm 
+                Khóa luận tốt nghiệp đầy thử thách này.
+            </p>
+
+            <p style="margin-bottom: 1rem;">
+                Chính sự tận tâm, những góp ý chi tiết và kịp thời của Cô đã giúp chúng em 
+                vượt qua biết bao khó khăn, từ việc định hình đề tài, xử lý số liệu cho đến 
+                hoàn thiện từng câu chữ. Kiến thức và kinh nghiệm của Cô là hành trang quý giá nhất.
+            </p>
+
+            <p>
+                Kính chúc Cô thật nhiều sức khỏe, luôn giữ mãi nụ cười rạng rỡ và nhiệt huyết với nghề. 
+                Chúc Cô tiếp tục gặt hái nhiều thành công hơn nữa trong sự nghiệp cao quý của mình. 
+                Chúng em kính chúc Cô một ngày Nhà giáo Việt Nam thật hạnh phúc!
+            </p>
+        </div>
+
+        <div style="text-align: right; width: 100%; max-width: 550px; margin-top: 30px; font-family: 'Quicksand', sans-serif;">
+            <p style="font-size: 1.1rem; font-weight: 500; color: #333;">
+                Với tất cả lòng kính trọng và biết ơn,
+            </p>
+            <p style="font-family: 'Dancing Script', cursive; font-size: 2.2rem; color: #d6336c; margin-top: 8px;">
+                Ngọc Ánh - Đức Giang - Đoàn Hương
+            </p>
+            <p style="font-size: 1rem; font-style: italic; color: #555; margin-top: 4px;">
+                Sinh viên Khóa luận - Bộ môn Khoa học máy tính
+            </p>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // --- Phần 1: Xử lý logic của thẻ chúc (giữ nguyên) ---
+            const envelope = document.getElementById('envelope');
+            const card = document.getElementById('card');
+            const titleElement = document.getElementById('main-title');
+
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const idData = urlParams.get('id');
+
+                if (idData) {
+                    const decodedString = atob(idData);
+                    const data = JSON.parse(decodedString);
+                    titleElement.textContent = data.title || "Chúc mừng bạn!";
+                } else {
+                    titleElement.textContent = "Vietnamese Teacher's Day 20-11";
+                }
+            } catch (e) {
+                console.error("Lỗi khi xử lý dữ liệu URL:", e);
+                titleElement.textContent = "Gửi bạn lời chúc!";
+            }
+
+            envelope.addEventListener('click', function() {
+                envelope.style.display = 'none';
+                card.style.display = 'block';
+            });
+            envelope.addEventListener('click', function() {
+                envelope.style.display = 'none';
+                card.style.display = 'block';
+
+                /* --- PHẦN THÊM MỚI ĐỂ CHẠY NHẠC --- */
+                const audio = document.getElementById('background-music');
+                audio.play();
+                /* --- Hết phần thêm mới --- */
+            });
+
+            // --- Phần 2: Tạo hiệu ứng rơi ---
+
+            const container = document.getElementById('falling-container');
+            const items = ['🌸', '🌺', '💖', '🎉', '🎁', '💝'];
+
+            /* --- PHẦN MỚI: Mảng các lời chúc nhỏ --- */
+            const shortMessages = [
+                "Hạnh phúc nhé!", 
+                "Luôn xinh!", 
+                "Yêu đời!", 
+                "Rạng rỡ!", 
+                "Tuyệt vời!",
+                "Dễ thương!"
+            ];
+
+            function createFallingItem() {
+                const item = document.createElement('span');
+                item.classList.add('falling-item');
+                item.textContent = items[Math.floor(Math.random() * items.length)];
+                
+                item.style.left = Math.random() * 100 + 'vw';
+                item.style.animationDuration = (Math.random() * 5 + 5) + 's';
+                item.style.fontSize = (Math.random() * 1 + 1) + 'rem';
+                item.style.opacity = Math.random() * 0.5 + 0.5;
+
+                /* --- PHẦN MỚI: Thêm sự kiện click cho vật thể rơi --- */
+                item.addEventListener('click', function(event) {
+                    // 1. Ẩn vật thể đi cho đỡ vướng
+                    this.style.display = 'none';
+
+                    // 2. Tạo lời chúc nhỏ
+                    const messageEl = document.createElement('span');
+                    messageEl.classList.add('click-message');
+                    
+                    // 3. Chọn ngẫu nhiên một lời chúc
+                    const randomMsg = shortMessages[Math.floor(Math.random() * shortMessages.length)];
+                    messageEl.textContent = randomMsg;
+
+                    // 4. Đặt vị trí của lời chúc tại nơi nhấp chuột
+                    // event.clientX/Y là vị trí con trỏ trên màn hình
+                    messageEl.style.left = event.clientX + 'px';
+                    messageEl.style.top = event.clientY + 'px';
+
+                    // 5. Thêm vào trang (phải thêm vào body mới hoạt động 
+                    //    vì container có pointer-events: none)
+                    document.body.appendChild(messageEl);
+
+                    // 6. Xóa lời chúc sau khi animation hoàn tất (1.5 giây)
+                    setTimeout(() => {
+                        messageEl.remove();
+                    }, 1500);
+                });
+                /* --- Hết phần mới --- */
+
+
+                container.appendChild(item);
+
+                setTimeout(() => {
+                    item.remove();
+                }, 10000);
+            }
+
+            setInterval(createFallingItem, 300);
+        });
+    </script>
+
+</body>
+</html>
